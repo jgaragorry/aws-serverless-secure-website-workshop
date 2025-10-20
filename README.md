@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/8525625/228801931-e461828f-1d93-4a87-95b2-320573113171.png" alt="Workshop Banner">
-</p>
-
 <h1 align="center">Workshop: Zero-Cost Secure Static Website on AWS</h1>
 <h3 align="center">A DevSecOps & FinOps Masterclass with Terraform & GitHub Actions</h3>
 
