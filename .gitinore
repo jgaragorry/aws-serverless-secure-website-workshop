@@ -14,4 +14,3 @@ terraform.tfvars
 *.bak
 .idea/
 .vscode/
-

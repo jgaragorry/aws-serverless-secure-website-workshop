@@ -101,10 +101,10 @@ aws-serverless-secure-website-workshop/
 
 1. **Fork y clona el repo**
 2. **Configura secretos en GitHub** (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
-3. **Edita `terraform/variables.tf` con tu dominio y correo**
+3. **Edita `terraform/variables.tf` con tu correo de alerta**
 4. **Haz push a `main` y aprueba el workflow**
-5. **Accede a tu sitio en `https://tudominio.com`**
-
+5. **Accede a tu sitio en el endpoint de CloudFront mostrado en la salida del deploy**  
+   *(ejemplo: `https://d123abc456xyz.cloudfront.net`)*
 ---
 
 ## ✅ 9. Validación post-deploy
