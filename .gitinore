@@ -1,0 +1,17 @@
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.tfvars
+
+# AWS credentials
+.env
+.aws/
+
+# Editor y sistema
+.DS_Store
+*.log
+*.bak
+.idea/
+.vscode/
+
