@@ -1,79 +1,181 @@
-# Workshop: Zero-Cost Secure Static Website on AWS | A DevSecOps & FinOps Masterclass
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/8525625/228801931-e461828f-1d93-4a87-95b2-320573113171.png" alt="Workshop Banner">
+</p>
 
-![Arquitectura del Workshop](https://user-images.githubusercontent.com/8525625/228800532-6a75f28a-8c46-4a41-8f2c-5b914a51e6b3.png) 
-*<p align="center">Diagrama de la arquitectura final que desplegaremos.</p>*
+<h1 align="center">Workshop: Zero-Cost Secure Static Website on AWS</h1>
+<h3 align="center">A DevSecOps & FinOps Masterclass with Terraform & GitHub Actions</h3>
+
+<p align="center">
+  <strong>Autor:</strong> Jesús Garagorry<br/>
+  <a href="https://www.linkedin.com/in/jgaragorry/" target="_blank">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
+  </a>
+  <a href="https://github.com/jgaragorry" target="_blank">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+  </a>
+  <a href="https://www.youtube.com/@Softraincorp" target="_blank">
+    <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube"/>
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Cloud-AWS-orange?style=for-the-badge&logo=amazonaws" alt="AWS"/>
+  <img src="https://img.shields.io/badge/IaC-Terraform-blueviolet?style=for-the-badge&logo=terraform" alt="Terraform"/>
+  <img src="https://img.shields.io/badge/CI/CD-GitHub_Actions-blue?style=for-the-badge&logo=githubactions" alt="GitHub Actions"/>
+  <img src="https://img.shields.io/badge/Nivel-Intermedio-green?style=for-the-badge" alt="Nivel Intermedio"/>
+</p>
 
 ---
 
-## 1. Introducción al Workshop
+## 📜 Tabla de Contenido
+1. [Introducción](#-1-introducción-al-workshop)
+2. [Arquitectura de la Solución](#-2-arquitectura-de-la-solución)
+3. [Prerrequisitos](#-3-prerrequisitos)
+4. [Guía Paso a Paso](#-4-manos-a-la-obra-guía-paso-a-paso)
+5. [Guía de lo Aprendido (How-To)](#-5-guía-de-lo-aprendido-how-to-resumen)
+6. [Solución de Problemas y Próximos Pasos](#-6-solución-de-problemas-y-próximos-pasos)
+7. [Licencia](#-7-licencia)
 
-### 1.1. Propósito y Objetivo
+---
 
-Bienvenido a este workshop práctico diseñado para llevar tus habilidades en la nube al siguiente nivel. El objetivo es desplegar una aplicación web estática en AWS de manera **segura, automatizada y con un enfoque proactivo en el control de costos (FinOps)**.
+## 🎯 1. Introducción al Workshop
+
+¡Bienvenido a este workshop práctico diseñado para llevar tus habilidades en la nube al siguiente nivel! El objetivo es desplegar una aplicación web estática en AWS de manera **segura, automatizada y con un enfoque proactivo en el control de costos (FinOps)**.
 
 A través de este ejercicio, no solo construirás una solución funcional, sino que también comprenderás y aplicarás las mejores prácticas de **DevOps, DevSecOps, SRE y Cloud Engineering**, creando un proyecto tangible y de alto valor para tu portafolio profesional.
 
-### 1.2. ¿A quién está dirigido?
-
-Este workshop está diseñado para un **nivel intermedio**. Se espera que tengas conocimientos fundamentales sobre:
-
-* Conceptos básicos de la nube (¿qué es una VM, almacenamiento de objetos, CDN?).
-* Uso básico de la línea de comandos y Git.
-* Nociones de qué es la Infraestructura como Código (IaC).
-
-**Nunca asumiremos conocimiento avanzado**. Cada paso, concepto y decisión técnica será explicado en detalle.
-
-### 1.3. Tecnologías y Disciplinas que Cubriremos
-
-| Disciplina | Herramienta/Concepto | Propósito en el Workshop |
-| :--- | :--- | :--- |
-| **Cloud Engineering** | AWS (S3, CloudFront, ACM, Route 53) | Construir la infraestructura serverless para alojar nuestro sitio web de forma escalable y eficiente. |
-| **Infraestructura como Código (IaC)** | Terraform | Definir, versionar y gestionar toda nuestra infraestructura de AWS de manera declarativa y reproducible. |
-| **DevOps / CI/CD** | GitHub Actions | Automatizar el proceso de validación, planificación y despliegue de nuestra infraestructura y código. |
-| **DevSecOps** | AWS WAF, OAC, Security Headers | Integrar la seguridad desde el diseño, protegiendo nuestro sitio contra ataques comunes y asegurando las comunicaciones. |
-| **FinOps** | AWS Budgets, Tagging, Automatización | Implementar control de costos proactivo, monitorear gastos y asegurar la limpieza de recursos para evitar facturas inesperadas. |
+[⬆️ Ir al Inicio](#-tabla-de-contenido)
 
 ---
 
-## 2. Arquitectura de la Solución
+## 🏗️ 2. Arquitectura de la Solución
 
-La solución que implementaremos es 100% serverless, lo que significa que no gestionaremos servidores, y solo pagaremos por el uso real (que, para un sitio con tráfico bajo-medio, estará dentro de la capa gratuita de AWS).
+La solución que implementaremos es 100% serverless, lo que significa que no gestionaremos servidores, y solo pagaremos por el uso real (que, para un sitio con tráfico bajo-medio, estará dentro de la capa gratuita de AWS). A continuación se muestran los diagramas de la arquitectura y el flujo CI/CD.
 
-El flujo es el siguiente:
+<details>
+  <summary><strong>Ver Diagrama de Arquitectura de la Aplicación</strong></summary>
 
-1.  **Desarrollador:** Realiza un cambio en el código del sitio web (en la carpeta `/src`) o en la infraestructura (en la carpeta `/terraform`) y lo sube a GitHub.
-2.  **GitHub Actions (CI/CD):** Un `push` a la rama `main` activa nuestro workflow automatizado.
-3.  **Validación y Planificación:** El workflow primero valida el código de Terraform, lo formatea y genera un plan de ejecución.
-4.  **Despliegue con Terraform:** GitHub Actions ejecuta `terraform apply`, que se comunica con AWS para crear o actualizar los siguientes recursos:
-    * **Route 53:** Gestiona el dominio DNS para nuestro sitio.
-    * **AWS Certificate Manager (ACM):** Provee un certificado SSL/TLS gratuito para habilitar HTTPS.
-    * **S3 Bucket:** Almacena los archivos estáticos (HTML, CSS, JS) de nuestro sitio web.
-    * **CloudFront Distribution (CDN):** Actúa como nuestra red de entrega de contenido. Acelera la entrega del sitio a nivel global, proporciona el cifrado HTTPS y se comunica de forma segura con S3.
-    * **Origin Access Control (OAC):** Una política que asegura que el bucket S3 solo pueda ser accedido a través de CloudFront.
-    * **AWS WAF:** Un firewall de aplicaciones web que protege nuestro sitio de vulnerabilidades comunes.
-    * **CloudFront Function:** Una pequeña función que inyecta cabeceras de seguridad en la respuesta HTTP para robustecer la seguridad del cliente.
-5.  **Sincronización de Contenido:** Una vez la infraestructura está desplegada, un paso en el mismo workflow sube el contenido de la carpeta `/src` al bucket S3.
-6.  **FinOps - Control de Costos:**
-    * **AWS Budgets:** Un presupuesto configurado vía Terraform que nos alertará si los costos superan un umbral definido (ej. $1).
-    * **Workflow de Destrucción:** Un segundo workflow manual (`destroy.yml`) nos permitirá destruir toda la infraestructura con un solo clic, asegurando un costo de $0 al finalizar el laboratorio.
-7.  **Usuario Final:** Accede al sitio web a través de un dominio personalizado, con una conexión rápida y segura (HTTPS).
+```mermaid
+graph TD
+    subgraph "Internet"
+        A[👨‍💻 Usuario Final]
+    end
+
+    subgraph "AWS Cloud"
+        B[🌐 Route 53: DNS] --> C{CDN: CloudFront Distribution};
+        subgraph "Seguridad en el Perímetro"
+          E[🛡️ AWS WAF] --> C;
+          F[⚙️ CloudFront Function: Security Headers] --> C;
+          G[📜 ACM: Certificado SSL/TLS] --> C;
+        end
+        C -- OAC (Origin Access Control) --> D[🪣 S3 Bucket: Contenido Estático];
+    end
+
+    A -- HTTPS --> B;
+
+    style D fill:#FF9900,stroke:#333,stroke-width:2px
+    style C fill:#232F3E,stroke:#fff,stroke-width:2px,color:#fff
+```
+</details>
+
+<details>
+  <summary><strong>Ver Diagrama del Flujo CI/CD</strong></summary>
+
+```mermaid
+graph LR
+    subgraph "Entorno del Desarrollador"
+        A[👨‍💻 Código Fuente<br>(Terraform & HTML)] -- git push --> B[📦 Repositorio GitHub];
+    end
+
+    subgraph "Pipeline Automatizado"
+        B -- Trigger en 'main' --> C[🤖 GitHub Actions Workflow];
+    end
+
+    subgraph "AWS Cloud"
+        D[🏗️ Infraestructura<br>Desplegada y Actualizada];
+    end
+
+    C -- Terraform Plan & Apply --> D;
+
+    style C fill:#2088FF,stroke:#333,stroke-width:2px,color:#fff
+```
+</details>
+
+[⬆️ Ir al Inicio](#-tabla-de-contenido)
 
 ---
 
-## 3. Prerrequisitos
+## 🛠️ 3. Prerrequisitos
 
-Antes de comenzar, asegúrate de tener todo lo siguiente.
+<details>
+  <summary><strong>Haz clic aquí para ver los prerrequisitos necesarios.</strong></summary>
 
-| Componente | Instrucciones y Propósito |
-| :--- | :--- |
-| **Cuenta de AWS** | Necesitarás una cuenta activa de AWS. Si no tienes una, puedes crearla [aquí](https://aws.amazon.com/free/). **Propósito:** Es la plataforma en la nube donde desplegaremos toda nuestra infraestructura. |
-| **Dominio Registrado** | Necesitarás un nombre de dominio (ej. `mi-workshop-increible.com`). Puedes registrarlo en Amazon Route 53, GoDaddy, Namecheap, etc. **Propósito:** Para acceder a nuestro sitio con un nombre amigable y poder generar un certificado SSL. |
-| **Cuenta de GitHub** | Si estás leyendo esto, es probable que ya la tengas. **Propósito:** Alojar nuestro código y ejecutar los pipelines de CI/CD con GitHub Actions. |
-| **Terraform CLI** | Instala la CLI de Terraform en tu máquina local. Sigue la [guía oficial](https://learn.hashicorp.com/tutorials/terraform/install-cli). **Propósito:** Aunque la automatización se ejecuta en GitHub Actions, tener la CLI localmente es esencial para pruebas y desarrollo. |
-| **AWS CLI** | Instala la CLI de AWS en tu máquina local. Sigue la [guía oficial](https://aws.amazon.com/cli/). **Propósito:** Para configurar tus credenciales y poder interactuar con tu cuenta de AWS desde la terminal. |
+- Cuenta de AWS activa
+- Dominio registrado
+- Terraform instalado localmente
+- Repositorio GitHub con permisos para usar GitHub Actions
+</details>
 
 ---
 
-## 4. Estructura del Repositorio
+## 🚀 4. ¡Manos a la Obra! Guía Paso a Paso
 
-Para mantener el orden y seguir las mejores prácticas, nuestro repositorio se organiza de la siguiente manera:
+### Paso 0: ⚙️ Configuración Inicial
+
+1. **Fork y Clonación del Repositorio**
+
+```bash
+git clone https://github.com/TU_USUARIO/aws-serverless-secure-website-workshop.git
+```
+
+2. **Configuración de Credenciales de AWS en GitHub**
+
+- Crea un usuario IAM con permisos de `AdministratorAccess`
+- Añade los secretos en GitHub:
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+
+3. **Configuración del Dominio en Route 53**
+
+- Crea una zona hospedada pública
+- Actualiza los NS en tu registrador
+
+### Paso 1: 🏗️ Despliegue y Validación
+
+- Edita `terraform/variables.tf` con tu dominio y correo
+- Haz push de los cambios
+- Aprueba el workflow en GitHub Actions
+- Verifica tu sitio en `https://www.tu-dominio.com`
+
+---
+
+## 📚 5. Guía de lo Aprendido (How-To Resumen)
+
+✅ Cloud Engineering: Arquitectura serverless con S3, CloudFront, Route 53, ACM  
+✅ IaC: Terraform para infraestructura reproducible  
+✅ CI/CD: GitHub Actions con aprobación manual  
+✅ DevSecOps: Seguridad en el perímetro y origen  
+✅ FinOps: Control de costos con AWS Budgets
+
+---
+
+## 🐛 6. Solución de Problemas y Próximos Pasos
+
+### Problemas Comunes
+
+- Certificado ACM no validado: espera propagación DNS
+- Access Denied: revisa política del bucket y OAC
+- Pipeline fallido: revisa secretos en GitHub
+
+### Ideas Futuras
+
+- Monitoreo con CloudWatch + SNS  
+- Backend serverless con API Gateway + Lambda  
+- Pruebas DAST con OWASP ZAP
+
+---
+
+## © 7. Licencia
+
+Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+
