@@ -6,7 +6,7 @@ Una masterclass práctica en **DevSecOps, FinOps y Cloud Engineering**, usando T
 
 ## 📚 1. Introducción
 
-Este workshop está diseñado para llevar tus habilidades en la nube al siguiente nivel. Aprenderás a construir una solución **serverless**, segura y con control de costos, aplicando prácticas reales de:
+Este workshop te guía paso a paso para construir una solución **serverless**, segura y con control de costos, aplicando prácticas reales de:
 
 - DevOps y CI/CD
 - DevSecOps
@@ -14,17 +14,19 @@ Este workshop está diseñado para llevar tus habilidades en la nube al siguient
 - FinOps
 - SRE y automatización
 
+Ideal para quienes buscan un proyecto tangible y profesional para su portafolio.
+
 ---
 
-## 🎯 2. ¿A quién está dirigido?
+## 🎯 2. Público Objetivo
 
-Este laboratorio es de nivel **intermedio**. Se espera que tengas conocimientos básicos sobre:
+Nivel **intermedio**. Se recomienda tener conocimientos básicos en:
 
-- Conceptos de nube (VM, S3, CDN)
-- Uso de Git y línea de comandos
-- Fundamentos de IaC
+- Conceptos de nube (S3, CDN, DNS)
+- Git y línea de comandos
+- Fundamentos de Terraform
 
-Cada paso está documentado para que puedas seguirlo sin experiencia avanzada.
+Cada paso está documentado para facilitar el aprendizaje autodidacta.
 
 ---
 
@@ -42,20 +44,17 @@ Cada paso está documentado para que puedas seguirlo sin experiencia avanzada.
 
 ## 🏗️ 4. Arquitectura de la Solución
 
-El flujo completo incluye:
+```mermaid
+graph TD
+    A[👨‍💻 Usuario Final] --> B[🌐 Route 53: DNS]
+    B --> C[🛡️ WAF + ⚙️ CloudFront Function + 📜 ACM]
+    C --> D[📦 CloudFront CDN]
+    D --> E[🪣 S3 Bucket: Contenido Estático]
+```
 
-- **Desarrollador**: Cambia código en `/src` o infraestructura en `/terraform`
-- **GitHub Actions**: Detecta cambios en `main` y ejecuta el pipeline
-- **Terraform**: Despliega recursos en AWS:
-  - Route 53: DNS
-  - ACM: Certificado SSL
-  - S3 Bucket: Archivos estáticos
-  - CloudFront: CDN con HTTPS
-  - OAC: Acceso seguro al bucket
-  - WAF: Protección contra ataques
-  - CloudFront Function: Cabeceras de seguridad
-- **FinOps**: AWS Budgets alerta si se supera el umbral de costos
-- **Destrucción**: Workflow manual (`destroy.yml`) elimina todo para evitar cargos
+- **Seguridad**: WAF, HTTPS, cabeceras seguras
+- **Automatización**: Terraform + GitHub Actions
+- **Costo controlado**: AWS Budgets + destrucción segura
 
 ---
 
@@ -110,7 +109,7 @@ aws-serverless-secure-website-workshop/
 
 - Terraform crea un presupuesto en AWS Budgets
 - Si superas el umbral, recibirás una alerta
-- Ejecuta el workflow `destroy.yml` para eliminar todo y evitar cargos
+- Ejecuta el workflow `destroy.yml` para eliminar todo y evitar cargos innecesarios
 
 ---
 
