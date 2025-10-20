@@ -50,7 +50,7 @@ A través de este ejercicio, no solo construirás una solución funcional, sino 
 
 ## 🏗️ 2. Arquitectura de la Solución
 
-La solución que implementaremos es 100% serverless, lo que significa que no gestionaremos servidores, y solo pagaremos por el uso real (que, para un sitio con tráfico bajo-medio, estará dentro de la capa gratuita de AWS). A continuación se muestran los diagramas de la arquitectura y el flujo CI/CD.
+La solución que implementaremos es 100% serverless, lo que significa que no gestionaremos servidores, y solo pagaremos por el uso real (que, para un sitio con tráfico bajo-medio, estará dentro de la capa gratuita de AWS).
 
 <details>
   <summary><strong>Ver Diagrama de Arquitectura de la Aplicación</strong></summary>
@@ -62,16 +62,16 @@ graph TD
     end
 
     subgraph "AWS Cloud"
-        B[🌐 Route 53: DNS] --> C{CDN: CloudFront Distribution};
+        B[🌐 Route 53: DNS] --> C{CDN: CloudFront Distribution}
         subgraph "Seguridad en el Perímetro"
-          E[🛡️ AWS WAF] --> C;
-          F[⚙️ CloudFront Function: Security Headers] --> C;
-          G[📜 ACM: Certificado SSL/TLS] --> C;
+          E[🛡️ AWS WAF] --> C
+          F[⚙️ CloudFront Function: Security Headers] --> C
+          G[📜 ACM: Certificado SSL/TLS] --> C
         end
-        C -- OAC (Origin Access Control) --> D[🪣 S3 Bucket: Contenido Estático];
+        C -- OAC --> D[🪣 S3 Bucket: Contenido Estático]
     end
 
-    A -- HTTPS --> B;
+    A -- HTTPS --> B
 
     style D fill:#FF9900,stroke:#333,stroke-width:2px
     style C fill:#232F3E,stroke:#fff,stroke-width:2px,color:#fff
@@ -84,20 +84,18 @@ graph TD
 ```mermaid
 graph LR
     subgraph "Entorno del Desarrollador"
-        A[👨‍💻 Código Fuente<br>(Terraform & HTML)] -- git push --> B[📦 Repositorio GitHub];
+        A[👨‍💻 Código Fuente: Terraform y HTML] --> B[📦 Repositorio GitHub]
     end
 
     subgraph "Pipeline Automatizado"
-        B -- Trigger en 'main' --> C[🤖 GitHub Actions Workflow];
+        B --> C[🤖 GitHub Actions Workflow]
     end
 
     subgraph "AWS Cloud"
-        D[🏗️ Infraestructura<br>Desplegada y Actualizada];
+        C --> D[🏗️ Infraestructura Desplegada y Actualizada]
     end
 
-    C -- Terraform Plan & Apply --> D;
-
-    style C fill:#2088FF,stroke:#333,stroke-width:2px,color:#fff
+    style C fill:#2885F8,stroke:#333,stroke-width:2px,color:#fff
 ```
 </details>
 
@@ -110,7 +108,7 @@ graph LR
 <details>
   <summary><strong>Haz clic aquí para ver los prerrequisitos necesarios.</strong></summary>
 
-- Cuenta de AWS activa
+- Cuenta activa en AWS
 - Dominio registrado
 - Terraform instalado localmente
 - Repositorio GitHub con permisos para usar GitHub Actions
