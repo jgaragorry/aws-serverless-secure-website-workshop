@@ -89,8 +89,10 @@ aws-serverless-secure-website-workshop/
 ├── src/                  # Código HTML del sitio
 ├── terraform/            # Infraestructura como código
 ├── .github/workflows/    # Pipelines CI/CD
+├── docs/                 # Documentación extendida (opcional)
 ├── README.md             # Documentación principal
 ├── LICENSE               # Licencia MIT
+├── SECURITY.md           # Política de seguridad
 ```
 
 ---
@@ -99,13 +101,42 @@ aws-serverless-secure-website-workshop/
 
 1. **Fork y clona el repo**
 2. **Configura secretos en GitHub** (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
-3. **Edita `variables.tf` con tu dominio y correo**
+3. **Edita `terraform/variables.tf` con tu dominio y correo**
 4. **Haz push a `main` y aprueba el workflow**
 5. **Accede a tu sitio en `https://tudominio.com`**
 
 ---
 
-## 💸 9. FinOps y Destrucción Segura
+## ✅ 9. Validación post-deploy
+
+Una vez desplegado el sitio, valida que esté seguro y optimizado:
+
+- [SSL Labs](https://www.ssllabs.com/ssltest/) — Verifica el certificado HTTPS
+- [SecurityHeaders.com](https://securityheaders.com/) — Evalúa cabeceras de seguridad
+- [Lighthouse](https://developers.google.com/web/tools/lighthouse) — Audita performance y accesibilidad
+
+---
+
+## 🧪 10. Validación local (opcional)
+
+Antes de hacer push, puedes validar localmente:
+
+```bash
+cd terraform
+terraform init
+terraform plan
+terraform apply
+```
+
+Recuerda destruir los recursos si estás en entorno de pruebas:
+
+```bash
+terraform destroy
+```
+
+---
+
+## 💸 11. FinOps y Destrucción Segura
 
 - Terraform crea un presupuesto en AWS Budgets
 - Si superas el umbral, recibirás una alerta
@@ -113,14 +144,24 @@ aws-serverless-secure-website-workshop/
 
 ---
 
-## 👨‍🏫 10. Autor
+## 🧠 12. Documentación extendida (opcional)
+
+Puedes añadir explicaciones didácticas en `/docs/` para principiantes:
+
+- `docs/que-es-cloudfront.md`
+- `docs/por-que-usar-oac.md`
+- `docs/finops-en-aws.md`
+
+---
+
+## 👨‍🏫 13. Autor
 
 **Jesús Garagorry**  
 [🔗 LinkedIn](https://www.linkedin.com/in/jgaragorry/) · [🐙 GitHub](https://github.com/jgaragorry) · [📺 YouTube](https://www.youtube.com/@Softraincorp)
 
 ---
 
-## 📄 11. Licencia
+## 📄 14. Licencia
 
 Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
 
