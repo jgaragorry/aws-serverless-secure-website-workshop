@@ -21,6 +21,10 @@ jobs:
       - name: Terraform Plan
         id: tf_plan
         run: terraform -chdir=terraform plan -var-file=terraform.tfvars -out=tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
 
       - name: Terraform Apply
         if: success()
