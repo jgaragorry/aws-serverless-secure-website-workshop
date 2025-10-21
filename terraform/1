@@ -1,3 +1,4 @@
+```hcl
 resource "random_pet" "bucket_suffix" {
   length    = 2
   separator = "-"
@@ -37,10 +38,10 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
 }
 
 resource "aws_s3_object" "index_html" {
-  bucket       = aws_s3_bucket.website_bucket.id
-  key          = "index.html"
-  source       = "${path.module}/../src/index.html"
-  etag         = filemd5("${path.module}/../src/index.html")
+  bucket  = aws_s3_bucket.website_bucket.id
+  key     = "index.html"
+  source  = "${path.module}/../src/index.html"
+  etag    = filemd5("${path.module}/../src/index.html")
   content_type = "text/html"
 }
 
@@ -78,56 +79,9 @@ resource "aws_cloudfront_response_headers_policy" "security_headers" {
     }
 
     referrer_policy {
-      override        = true
-      referrer_policy = "no-referrer"
+      override         = true
+      referrer_policy  = "no-referrer"
     }
-  }
-}
-
-resource "aws_cloudfront_distribution" "cdn" {
-  enabled             = true
-  default_root_object = "index.html"
-
-  origin {
-    domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
-    origin_id   = "s3-origin-${random_pet.bucket_suffix.id}"
-
-    s3_origin_config {
-      origin_access_identity = null
-    }
-
-    origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
-  }
-
-  default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "s3-origin-${random_pet.bucket_suffix.id}"
-
-    viewer_protocol_policy = "redirect-to-https"
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers.id
-  }
-
-  viewer_certificate {
-    cloudfront_default_certificate = true
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  tags = {
-    Name = "secure-static-site-${random_pet.bucket_suffix.id}"
   }
 }
 
@@ -147,4 +101,3 @@ resource "aws_budgets_budget" "monthly_budget" {
     notification_type   = "ACTUAL"
   }
 }
-
