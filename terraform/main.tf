@@ -92,6 +92,10 @@ resource "aws_cloudfront_distribution" "cdn" {
     domain_name              = aws_s3_bucket.website_bucket.bucket_regional_domain_name
     origin_id                = "s3-origin-${random_pet.bucket_suffix.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
+
+    s3_origin_config {
+      origin_access_identity = ""
+    }
   }
 
   default_cache_behavior {
@@ -140,6 +144,11 @@ resource "aws_budgets_budget" "monthly_budget" {
     threshold           = 80
     threshold_type      = "PERCENTAGE"
     notification_type   = "ACTUAL"
+
+    subscriber {
+      subscription_type = "EMAIL"
+      address           = "tu-correo@ejemplo.com"
+    }
   }
 }
 
