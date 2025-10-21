@@ -145,7 +145,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   tags = {
-    Project = "SecureStaticSite-v11"
+    Project = "SecureStaticSite-v12"
   }
 }
 
