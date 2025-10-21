@@ -179,6 +179,26 @@ terraform/
 - **Error**: `BucketNotEmpty` durante destroy  
   **Causa**: Objetos residuales en bucket S3  
   **Solución**: Vaciar bucket manualmente antes de destroy
+---
+
+## 🛠️ Troubleshooting y validación del flujo completo
+
+Este workshop documenta no solo el despliegue exitoso de una infraestructura segura en AWS, sino también los errores encontrados y cómo se resolvieron de forma reproducible y didáctica.
+
+Para revisar los problemas comunes, las correcciones aplicadas y cómo validar que el flujo `deploy.yml → destroy.yml` funciona correctamente con backend remoto, consulta el archivo:
+
+📄 [`troubleshooting.md`](./troubleshooting.md)
+
+Incluye:
+
+- Migración al backend remoto en S3
+- Validación de estado compartido entre workflows
+- Ejecución y verificación de `destroy.yml`
+- Checklist final para estudiantes
+
+Este archivo forma parte integral del aprendizaje del workshop y debe ser revisado antes de avanzar a nuevas fases.
+
+---
 
 ## 📝 Conclusión
 

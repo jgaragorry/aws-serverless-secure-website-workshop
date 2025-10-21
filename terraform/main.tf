@@ -1,3 +1,11 @@
+terraform {
+  backend "s3" {
+    bucket = "secure-static-site-central-seagull"
+    key    = "terraform/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
 resource "random_pet" "bucket_suffix" {
   length    = 2
   separator = "-"
