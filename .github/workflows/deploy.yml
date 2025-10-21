@@ -1,12 +1,16 @@
-name: Deploy Static Website
+name: Deploy AWS Static Site
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
 
     steps:
       - name: Checkout repo
@@ -14,27 +18,29 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         run: terraform -chdir=terraform init
 
       - name: Terraform Plan
-        id: tf_plan
         run: terraform -chdir=terraform plan -var-file=terraform.tfvars -out=tfplan
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Apply
-        if: success()
         run: terraform -chdir=terraform apply -auto-approve tfplan
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Obtener URL del sitio
-        id: terraform_output
+      - name: Export site_url to environment
         run: |
-          site_url=$(terraform -chdir=terraform output -raw site_url)
-          echo "site_url=$site_url" >> $GITHUB_OUTPUT
+          echo "SITE_URL=$(terraform -chdir=terraform output -raw site_url)" >> $GITHUB_ENV
+
+      - name: Print CloudFront URL
+        run: echo "✅ Sitio desplegado en: $SITE_URL"
 
