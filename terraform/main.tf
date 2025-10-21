@@ -133,7 +133,7 @@ resource "aws_budgets_budget" "monthly_budget" {
   limit_amount      = "5"
   limit_unit        = "USD"
 
-  time_period_start = formatdate("YYYY-MM-DD'T'HH:mm:00'Z'", timestamp())
+  time_period_start = formatdate("YYYY-MM-DD_HH:mm", timestamp())
 
   notification {
     comparison_operator = "GREATER_THAN"
