@@ -158,6 +158,48 @@ Confirma que los recursos como buckets y distribuciones ya no existen.
 - El flujo completo `deploy.yml → destroy.yml` es reproducible y seguro
 
 ---
+## ✅ Validación final de `destroy.yml` tras sincronización
+
+**Objetivo:** Confirmar que el error `412 PreconditionFailed` se resuelve al sincronizar el estado con `terraform refresh`.
+
+---
+
+### 🧪 Paso 1: Ejecutar `terraform refresh`
+
+```bash
+terraform -chdir=terraform refresh
+```
+
+Esto actualiza el estado remoto con la configuración real en AWS. Resultado esperado:
+
+```
+aws_cloudfront_distribution.cdn: Refreshing state... [id=EU2C1507QBLS9]
+```
+
+---
+
+### 🚀 Paso 2: Ejecutar `destroy.yml` desde GitHub Actions
+
+Desde la pestaña **Actions**, selecciona `Destroy AWS Static Site` y haz clic en **Run workflow**.
+
+---
+
+### ✅ Resultado esperado
+
+- Todos los recursos son destruidos sin errores
+- El estado remoto se limpia
+- El flujo `deploy.yml → destroy.yml` queda validado
+
+---
+
+### 🧨 Si el error persiste
+
+- Verifica si la distribución de CloudFront fue modificada manualmente
+- Elimínala desde la consola de AWS
+- Ejecuta nuevamente `terraform destroy -auto-approve` para limpiar el resto
+
+---
+
 
 ## ✅ Checklist final para estudiantes
 
