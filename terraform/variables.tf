@@ -15,3 +15,15 @@ variable "budget_notification_email" {
   type        = string
 }
 
+variable "aws_region" {
+  description = "Región AWS donde se desplegará la infraestructura"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "budget_limit" {
+  description = "Límite mensual de presupuesto en USD"
+  type        = string
+  default     = "5.00"
+}
+

@@ -1,155 +1,207 @@
-# 🛠️ Workshop: AWS Serverless Secure Website con Terraform
+# 📘 README-GUIA.md — Workshop: Sitio Web Estático Seguro y Sin Costos en AWS
 
-Este workshop enseña cómo desplegar un sitio web estático en AWS usando Terraform, aplicando buenas prácticas de seguridad, automatización, reproducibilidad y FinOps.
+Este documento guía el despliegue completo, validación de seguridad, automatización y documentación del workshop. Está diseñado para enseñar buenas prácticas DevSecOps, FinOps y IaC usando Terraform y GitHub Actions.
 
 ---
 
-## 📁 Estructura del repositorio
+## 🧩 1. Estructura del repositorio
 
 ```
 aws-serverless-secure-website-workshop/
-├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── providers.tf
-├── src/
-│   └── index.html
+├── src/                  # Contenido HTML del sitio web
+│   └── index.html        # Página principal que se sube a S3
+├── terraform/            # Módulo de infraestructura
+│   ├── main.tf           # Define todos los recursos AWS
+│   ├── variables.tf      # Variables parametrizables
+│   ├── outputs.tf        # Resultados como la URL del sitio
+│   └── README-GUIA.md    # Este archivo
+├── .github/workflows/    # Automatización CI/CD
+│   └── deploy.yml        # Workflow para aplicar Terraform automáticamente
+├── LICENSE               # Licencia MIT
+├── SECURITY.md           # Política de seguridad del proyecto
+├── README.md             # Portada del repositorio
 ```
 
 ---
 
-## 📦 ¿Qué hace cada archivo Terraform?
-
-Todos los archivos `.tf` están dentro de la carpeta `terraform/` para mantener la infraestructura separada del contenido del sitio (`src/`). Terraform carga automáticamente todos los `.tf` del directorio activo, sin importar el orden alfabético. Sin embargo, el orden lógico de lectura y ejecución es el siguiente:
-
-### `providers.tf`
-
-- 📌 **Propósito**: Define los proveedores que usaremos (`aws`, `random`) y la región.
-- 🧠 **Por qué es importante**: Sin esto, Terraform no sabe qué servicios usar ni dónde desplegar.
-- 🧪 **Cuándo se usa**: En `terraform init`, para instalar los plugins necesarios.
-
-### `variables.tf`
-
-- 📌 **Propósito**: Declara las variables que podemos personalizar (`use_custom_domain`, `domain_name`, `budget_notification_email`).
-- 🧠 **Por qué es importante**: Permite parametrizar el despliegue y hacerlo reutilizable.
-- 🧪 **Cuándo se usa**: En `terraform plan` y `terraform apply`, cuando se solicitan valores o se usan condicionales.
+## 📂 2. Detalle de cada archivo Terraform
 
 ### `main.tf`
+Define todos los recursos del workshop:
+- S3 bucket con acceso restringido
+- CloudFront con OAC y cabeceras seguras
+- Subida automática de `index.html`
+- Política de acceso segura
+- Presupuesto FinOps
+- Outputs con la URL del sitio
 
-- 📌 **Propósito**: Define todos los recursos de AWS que se van a crear.
-- 🧠 **Por qué es importante**: Es el núcleo del despliegue: bucket, CloudFront, OAI, política, presupuesto, y subida automática del sitio.
-- 🧪 **Cuándo se usa**: En `terraform plan`, `apply` y `destroy`.
+### `variables.tf`
+Contiene las variables necesarias:
+- `aws_region`: región AWS
+- `budget_notification_email`: correo para alertas
+- `budget_limit`: monto mensual
+- `use_custom_domain` y `domain_name`: opcionales para dominio propio
 
 ### `outputs.tf`
+Entrega la URL final del sitio desplegado:
 
-- 📌 **Propósito**: Expone valores útiles después del despliegue, como la URL del sitio.
-- 🧠 **Por qué es importante**: Permite mostrar resultados al usuario sin buscar en la consola.
-- 🧪 **Cuándo se usa**: En `terraform apply` y `terraform output`.
-
----
-
-## 🚀 Fase 1 – Validación local
-
-Antes de desplegar, valida y formatea tu configuración:
-
-```bash
-terraform fmt
-terraform validate
+```
+output "cloudfront_url" {
+  value       = "https://${aws_cloudfront_distribution.cdn.domain_name}"
+  description = "URL del sitio desplegado en CloudFront"
+}
 ```
 
-Esto asegura que la sintaxis esté correcta y el estilo sea consistente.
+---
+
+## 💸 3. Presupuesto FinOps en AWS
+
+El recurso creado en Terraform es:
+
+```
+resource "aws_budgets_budget" "monthly_budget" {
+  name         = "monthly-budget"
+  # ... configuración adicional
+}
+```
+
+🔍 En la consola de AWS, búscalo como:
+
+```
+Presupuesto: monthly-budget
+```
+
+Este presupuesto monitorea el servicio Amazon CloudFront y envía alertas al correo definido cuando se supera el 80% del límite.
 
 ---
 
-## ⚙️ Fase 2 – Inicialización y plan
+## 🔐 4. Validación de seguridad del sitio
 
-Inicializa el entorno Terraform y genera el plan de ejecución:
+Una vez desplegado, accede a la URL generada:
 
-```bash
+[https://d3ktm8cm9qh9bk.cloudfront.net](https://d3ktm8cm9qh9bk.cloudfront.net)
+
+Valida la seguridad con estas herramientas:
+
+1. **SSL Labs**
+   - Verifica el certificado HTTPS
+   - Evalúa el protocolo TLS
+   - Detecta vulnerabilidades en la configuración SSL
+
+2. **SecurityHeaders.com**
+   - Analiza las cabeceras HTTP
+   - Detecta si faltan cabeceras críticas como:
+     - Strict-Transport-Security
+     - Content-Security-Policy
+     - X-Frame-Options
+     - Referrer-Policy
+
+3. **Lighthouse**
+   - Audita performance, accesibilidad, SEO y buenas prácticas
+   - Ideal para validar la calidad del sitio como producto web
+
+---
+
+## ⚙️ 5. Despliegue manual con Terraform
+
+Este workshop puede desplegarse manualmente con los siguientes comandos:
+
+```
 terraform init
 terraform plan
+terraform apply --auto-approve
 ```
 
-Verifica que el plan indique `add` y no haya errores. Si usas variables como `budget_notification_email`, se te pedirá ingresarlas.
+Esto garantiza control total, validación paso a paso y corrección de errores en tiempo real.
 
 ---
 
-## 🧩 Fase 3 – Despliegue automatizado y validación del sitio
+## 🤖 6. Automatización con GitHub Actions
 
-Ejecuta el despliegue completo:
+El archivo `.github/workflows/deploy.yml` está configurado para ejecutar el despliegue automáticamente al hacer push a la rama `main`.
 
-```bash
-terraform apply -auto-approve
+Contenido del workflow:
+
+```
+name: Deploy Static Website
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform -chdir=terraform init
+
+      - name: Terraform Plan
+        run: terraform -chdir=terraform plan
+
+      - name: Terraform Apply
+        run: terraform -chdir=terraform apply -auto-approve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Obtener URL del sitio
+        id: terraform_output
+        run: |
+          echo "site_url=$(terraform -chdir=terraform output -raw site_url)" >> $GITHUB_OUTPUT
+
+      - name: Verificar sitio activo
+        run: curl -I ${{ steps.terraform_output.outputs.site_url }}
 ```
 
-Esto crea automáticamente:
-
-- 🪣 Un bucket S3 con nombre aleatorio (`random_pet`)
-- 📦 Una distribución CloudFront con HTTPS y OAI
-- 🛡️ Una política de acceso segura que permite solo a CloudFront leer el contenido
-- 📤 Subida automática del archivo `src/index.html` al bucket mediante `aws_s3_object`
-- 💸 Un presupuesto FinOps con alertas al correo definido
+**Requisitos previos:**
+- Las credenciales AWS deben estar configuradas como secretos en GitHub (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
+- El código en `terraform/` debe estar completo y sin errores.
+- Las variables deben tener valores por defecto o estar definidas en `terraform.tfvars`.
 
 ---
 
-### ✅ Validación post-deploy
+## 🧠 7. Lecciones aprendidas
 
-1. **Obtén la URL del sitio:**
-
-```bash
-terraform output site_url
-```
-
-Ejemplo:
-
-```
-site_url = "https://d9g53hw2erdpd.cloudfront.net"
-```
-
-2. **Accede al sitio en tu navegador** y verifica que se muestra el contenido de `index.html`.
-
-3. **Valida seguridad y performance** con herramientas externas:
-
-| Herramienta        | ¿Qué valida?             | Enlace                                      |
-|--------------------|--------------------------|---------------------------------------------|
-| SSL Labs           | HTTPS y cifrado          | https://www.ssllabs.com/ssltest/            |
-| SecurityHeaders    | Cabeceras HTTP seguras   | https://securityheaders.com/                |
-| Lighthouse         | Performance y accesibilidad | Chrome DevTools > Audits                |
+- Terraform no permite duplicar bloques `provider` ni `required_providers`.
+- Algunos atributos como `iam_arn`, `cost_filters` o `budget_filter` han sido deprecados.
+- Las cabeceras de seguridad deben configurarse con `aws_cloudfront_response_headers_policy`.
+- Validar cada paso con `terraform plan` evita errores en producción.
+- Documentar cada corrección como parte del aprendizaje DevSecOps.
 
 ---
 
-## 🔥 Fase 4 – Destrucción segura (FinOps)
+## 🧹 8. Destrucción segura
 
-Una vez validado el despliegue, elimina todos los recursos para evitar costos:
+Para evitar cargos innecesarios en AWS:
 
-```bash
-terraform destroy -auto-approve
+```
+terraform destroy --auto-approve
 ```
 
-Esto elimina:
-
-- El bucket S3
-- La distribución CloudFront
-- La política de acceso
-- El presupuesto FinOps
+Esto elimina todos los recursos creados, incluyendo:
+- S3 bucket
+- CloudFront distribution
+- Presupuesto FinOps
 
 ---
 
-## 📌 Notas didácticas
+## 👨‍🏫 9. Autor
 
-- El archivo `index.html` se sube automáticamente gracias al recurso `aws_s3_object`, eliminando el paso manual `aws s3 cp`.
-- El nombre del bucket se genera dinámicamente con `random_pet` para evitar colisiones.
-- La política de acceso restringe el contenido a CloudFront, siguiendo buenas prácticas de seguridad.
-- El presupuesto FinOps permite enseñar control de costos desde el primer despliegue.
-- El flujo completo es reproducible, validado y listo para ser integrado en GitHub Actions.
+José Garagorry  
+🔗 LinkedIn · 🐙 GitHub · 📺 YouTube
 
 ---
 
-## 🎓 Recomendaciones para estudiantes
+## 📄 10. Licencia
 
-- Clona el repositorio y sigue las fases paso a paso.
-- Modifica el archivo `src/index.html` para personalizar tu sitio.
-- Usa `terraform destroy` al finalizar para evitar cargos.
-- Comparte tu sitio y validación en redes como parte de tu portafolio DevOps.
+Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+```
 
