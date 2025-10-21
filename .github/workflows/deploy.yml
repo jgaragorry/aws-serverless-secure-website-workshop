@@ -20,7 +20,7 @@ jobs:
 
       - name: Terraform Plan
         id: tf_plan
-        run: terraform -chdir=terraform plan -var-file=terraform/terraform.tfvars -out=tfplan
+        run: terraform -chdir=terraform plan -var-file=terraform.tfvars -out=tfplan
 
       - name: Terraform Apply
         if: success()

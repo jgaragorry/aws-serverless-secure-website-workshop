@@ -3,6 +3,8 @@
 *.tfstate.backup
 .terraform/
 terraform.tfvars
+!terraform/terraform.tfvars
+
 
 # AWS credentials
 .env
