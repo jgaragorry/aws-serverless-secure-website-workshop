@@ -147,7 +147,7 @@ resource "aws_budgets_budget" "monthly_budget" {
 
     subscriber {
       subscription_type = "EMAIL"
-      address           = "tu-correo@ejemplo.com"
+      address           = "jgaragorry@gmail.com"
     }
   }
 }
