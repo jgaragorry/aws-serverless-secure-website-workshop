@@ -1,164 +1,142 @@
-# 🛡️ Workshop: Sitio Web Estático Seguro y Sin Costos en AWS
+# 🚀 Workshop: Sitio Web Estático Seguro y Sin Costos en AWS
 
-Una masterclass práctica en **DevSecOps, FinOps y Cloud Engineering**, usando Terraform y GitHub Actions para desplegar un sitio web estático, seguro y automatizado en AWS.
-
----
-
-## 📚 1. Introducción
-
-Este workshop te guía paso a paso para construir una solución **serverless**, segura y con control de costos, aplicando prácticas reales de:
-
-- DevOps y CI/CD
-- DevSecOps
-- Infraestructura como Código (IaC)
-- FinOps
-- SRE y automatización
-
-Ideal para quienes buscan un proyecto tangible y profesional para su portafolio.
+Este repositorio contiene el código y la infraestructura necesaria para desplegar automáticamente un sitio web estático en AWS, utilizando **Terraform** como herramienta de infraestructura como código (IaC) y **GitHub Actions** como motor de automatización CI/CD.
 
 ---
 
-## 🎯 2. Público Objetivo
+## 🎯 ¿Qué logramos con este workshop?
 
-Nivel **intermedio**. Se recomienda tener conocimientos básicos en:
-
-- Conceptos de nube (S3, CDN, DNS)
-- Git y línea de comandos
-- Fundamentos de Terraform
-
-Cada paso está documentado para facilitar el aprendizaje autodidacta.
-
----
-
-## 🧰 3. Tecnologías y Disciplinas
-
-| Disciplina                  | Herramienta / Concepto                 | Propósito en el Workshop         |
-|-----------------------------|----------------------------------------|----------------------------------|
-| Cloud Engineering           | AWS (S3, CloudFront, ACM, Route 53)    | Infraestructura serverless       |
-| Infraestructura como Código | Terraform                              | Infraestructura reproducible     |
-| DevOps / CI/CD              | GitHub Actions                         | Automatización del despliegue    |
-| DevSecOps                   | OAI, cabeceras seguras, HTTPS          | Seguridad desde el diseño        |
-| FinOps                      | AWS Budgets, destrucción segura        | Control de costos y limpieza     |
+- ✅ Desplegar un sitio web estático en AWS S3 + CloudFront  
+- ✅ Automatizar el despliegue con GitHub Actions al hacer push a `main`  
+- ✅ Aplicar cabeceras de seguridad HTTP con CloudFront  
+- ✅ Validar el sitio con herramientas profesionales (SSL Labs, Security Headers, Lighthouse)  
+- ✅ Implementar un presupuesto FinOps para evitar costos inesperados  
+- ✅ Documentar todo el proceso para reproducibilidad  
 
 ---
 
-## 🏗️ 4. Arquitectura de la Solución
+## 🧠 Buenas prácticas aplicadas
 
-```
-graph TD
-    A[👨‍💻 Usuario Final] --> B[🌐 Route 53: DNS]
-    B --> C[🛡️ HTTPS + OAI + Política S3]
-    C --> D[📦 CloudFront CDN]
-    D --> E[🪣 S3 Bucket: Contenido Estático]
-```
-Seguridad: HTTPS, OAI, política de acceso restringido  
-Automatización: Terraform + GitHub Actions  
-Costo controlado: AWS Budgets + destrucción segura
+### 🔐 Seguridad  
+- Cabeceras HTTP aplicadas con `aws_cloudfront_response_headers_policy` como:  
+  `Strict-Transport-Security`, `Content-Security-Policy`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`, `X-Content-Type-Options`  
+- Redirección a HTTPS obligatoria (`redirect-to-https`)  
+- Política de acceso restringido al bucket S3  
+- Mínimo protocolo TLS 1.2 (`TLSv1.2_2021`)  
+- Política de acceso CloudFront con OAC (Origin Access Control)  
 
----
+### 💸 FinOps  
+- Presupuesto mensual configurado (`monthly-budget`) con alertas al 80%  
+- Monitorización del servicio Amazon CloudFront para control de costos  
 
-## 🧪 5. Flujo CI/CD
-
-```
-graph LR
-    A[👨‍💻 Código Fuente] --> B[📦 GitHub Repo]
-    B --> C[🤖 GitHub Actions]
-    C --> D[🏗️ Terraform Apply en AWS]
-    D --> E[🌐 Sitio Web Activo con HTTPS]
-```
+### 🤖 Automatización CI/CD  
+- Workflow en `.github/workflows/deploy.yml` que ejecuta `terraform init`, `plan` y `apply` automáticamente con cada push a `main`  
+- Verificación automática de que el sitio se encuentra activo  
+- Uso seguro de secretos para credenciales AWS  
 
 ---
 
-## 🔧 6. Prerrequisitos
+## 🔍 Validación del despliegue
 
-| Componente   | Propósito                   |
-|---------------|------------------------------|
-| Cuenta AWS    | Desplegar infraestructura    |
-| Cuenta GitHub | Ejecutar CI/CD              |
-| Terraform CLI | Pruebas locales              |
-| AWS CLI       | Configurar credenciales      |
+### 🌐 Sitio desplegado  
+[https://d3ktm8cm9qh9bk.cloudfront.net](https://d3ktm8cm9qh9bk.cloudfront.net)
+
+### 🔐 Seguridad TLS — [SSL Labs](https://www.ssllabs.com/ssltest/)  
+- Calificación **A** para servidores  
+- Certificado válido y protocolo TLS seguro  
+
+### 🛡️ Cabeceras HTTP — [SecurityHeaders.com](https://securityheaders.com/)  
+- Cabeceras críticas implementadas correctamente  
+- Protección contra XSS, clickjacking, sniffing y fugas de información  
+
+### 🚀 Rendimiento y SEO — [Lighthouse](https://web.dev/measure/)  
+- **Performance: 100**  
+- **Accessibility: 100**  
+- **Best Practices: 100**  
+- **SEO: 100**  
 
 ---
 
-## 📁 7. Estructura del Repositorio
+## 📂 1. Estructura del repositorio
 
 ```
 aws-serverless-secure-website-workshop/
 ├── src/                  # Código HTML del sitio
+│   └── index.html        # Página principal para S3
 ├── terraform/            # Infraestructura como código
 │   ├── main.tf           # Recursos AWS y lógica principal
 │   ├── variables.tf      # Variables parametrizables
-│   ├── outputs.tf        # Resultados como la URL del sitio
-│   ├── providers.tf      # Proveedores y región AWS
-│   └── README-GUIA.md    # Guía paso a paso del workshop
-├── .github/workflows/    # Pipelines CI/CD (opcional)
+│   ├── outputs.tf        # Resultados como URL de sitio
+│   └── README-GUIA.md    # Guía técnica detallada
+├── .github/workflows/    # Pipelines CI/CD
+│   └── deploy.yml        # Workflow de despliegue automático
 ├── LICENSE               # Licencia MIT
-├── SECURITY.md           # Política de seguridad
-├── README.md             # Portada del repositorio
+├── SECURITY.md           # Política de seguridad y cumplimiento
+├── README.md             # Este archivo principal
 ```
 
 ---
 
-## 🚀 8. Guía Paso a Paso
+## 📂 2. Detalle de configuraciones importantes
 
-1. Clona el repositorio
-2. Edita `terraform/variables.tf` con tu correo de alerta
-3. Ejecuta localmente:
+### `main.tf`  
+Define recursos: S3 sin acceso público, CloudFront con OAC y políticas de seguridad, carga automática de contenido, y presupuesto FinOps.
+
+### `variables.tf`  
+Variables: región AWS, correo para alertas, límite presupuestario, dominio personalizado.
+
+### `outputs.tf`  
+Entrega la URL final del sitio, por ejemplo:
 
 ```
-cd terraform
+output "cloudfront_url" {
+  value       = "https://${aws_cloudfront_distribution.cdn.domain_name}"
+  description = "URL del sitio desplegado en CloudFront"
+}
+```
+
+---
+
+## ⚙️ 3. Despliegue manual con Terraform
+
+```
 terraform init
-terraform apply -auto-approve
-```
-
-4. Accede al sitio en el endpoint generado por CloudFront (por ejemplo: https://d123abc456xyz.cloudfront.net)
-
----
-
-## ✅ 9. Validación post-deploy
-
-Valida que el sitio esté seguro y optimizado:
-
-- SSL Labs — Verifica el certificado HTTPS
-- SecurityHeaders.com — Evalúa cabeceras de seguridad
-- Lighthouse — Audita performance y accesibilidad
-
----
-
-## 💸 10. FinOps y Destrucción Segura
-
-Terraform crea un presupuesto en AWS Budgets.  
-Si superas el umbral, recibirás una alerta por correo.
-
-```
-terraform destroy -auto-approve
-```
-
-Para eliminar todos los recursos y evitar cargos innecesarios.
-
----
-
-## 🧠 11. Documentación extendida (opcional)
-
-Puedes añadir explicaciones didácticas en `/docs/` para principiantes:
-
-```
-docs/que-es-cloudfront.md
-docs/por-que-usar-oai.md
-docs/finops-en-aws.md
+terraform plan
+terraform apply --auto-approve
 ```
 
 ---
 
-## 👨‍🏫 12. Autor
+## 🤖 4. Automatización con GitHub Actions
+
+Workflow `.github/workflows/deploy.yml`, que:
+
+- Se activa con push a `main`  
+- Ejecuta `terraform init`, `plan` y `apply`  
+- Obtiene URL desplegada y verifica disponibilidad  
+- Usa secretos `AWS_ACCESS_KEY_ID` y `AWS_SECRET_ACCESS_KEY`  
+
+---
+
+## 🧹 5. Destrucción segura
+
+Para evitar cobros no deseados, elimina los recursos con:
+
+```
+terraform destroy --auto-approve
+```
+
+---
+
+## 👨‍🏫 6. Autor y contacto
 
 José Garagorry  
-🔗 LinkedIn · 🐙 GitHub · 📺 YouTube
+🔗 [GitHub](https://github.com/jgaragorry) · [LinkedIn](https://www.linkedin.com/in/jgaragorry/) · [YouTube](https://www.youtube.com/@Softraincorp) · [TikTok](https://www.tiktok.com/@softtraincorp) · [Comunidad WhatsApp](https://chat.whatsapp.com/ENuRMnZ38fv1pk0mHlSixa)
 
 ---
 
-## 📄 13. Licencia
+## 📄 7. Licencia
 
-Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para detalles.
 ```
 
