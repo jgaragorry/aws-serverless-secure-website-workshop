@@ -89,13 +89,8 @@ resource "aws_cloudfront_distribution" "cdn" {
   default_root_object = "index.html"
 
   origin {
-    domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
-    origin_id   = "s3-origin-${random_pet.bucket_suffix.id}"
-
-    s3_origin_config {
-      origin_access_identity = null
-    }
-
+    domain_name              = aws_s3_bucket.website_bucket.bucket_regional_domain_name
+    origin_id                = "s3-origin-${random_pet.bucket_suffix.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
   }
 
@@ -138,7 +133,7 @@ resource "aws_budgets_budget" "monthly_budget" {
   limit_amount      = "5"
   limit_unit        = "USD"
 
-  time_period_start = formatdate("YYYY-MM-DD'T'HH:MM:SS'Z'", timestamp())
+  time_period_start = formatdate("YYYY-MM-DD'T'HH:mm:00'Z'", timestamp())
 
   notification {
     comparison_operator = "GREATER_THAN"
