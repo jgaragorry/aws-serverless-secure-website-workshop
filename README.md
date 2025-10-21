@@ -61,18 +61,23 @@ Este repositorio contiene el código y la infraestructura necesaria para despleg
 
 ```
 aws-serverless-secure-website-workshop/
-├── src/                  # Código HTML del sitio
-│   └── index.html        # Página principal para S3
-├── terraform/            # Infraestructura como código
-│   ├── main.tf           # Recursos AWS y lógica principal
-│   ├── variables.tf      # Variables parametrizables
-│   ├── outputs.tf        # Resultados como URL de sitio
-│   └── README-GUIA.md    # Guía técnica detallada
-├── .github/workflows/    # Pipelines CI/CD
-│   └── deploy.yml        # Workflow de despliegue automático
-├── LICENSE               # Licencia MIT
-├── SECURITY.md           # Política de seguridad y cumplimiento
-├── README.md             # Este archivo principal
+├── src/                      # Código HTML del sitio
+│   └── index.html            # Página principal para S3
+├── terraform/                # Infraestructura como código
+│   ├── main.tf               # Recursos AWS y lógica principal
+│   ├── variables.tf          # Variables parametrizables
+│   ├── outputs.tf            # Resultados como URL de sitio
+│   └── README-GUIA.md        # Guía técnica detallada
+├── .github/workflows/        # Pipelines CI/CD
+│   ├── deploy.yml            # Workflow de despliegue automático
+│   └── destroy.yml           # Workflow de destrucción manual
+├── scripts/                  # Automatización del backend remoto
+│   ├── create-backend.sh     # Script para crear el bucket remoto con versionado
+│   └── delete-backend.sh     # Script para eliminar el bucket remoto con confirmación
+├── steps.md                  # Procedimiento completo validado desde cero
+├── LICENSE                   # Licencia MIT
+├── SECURITY.md               # Política de seguridad y cumplimiento
+├── README.md                 # Este archivo principal
 ```
 
 ---

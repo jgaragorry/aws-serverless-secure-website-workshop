@@ -25,6 +25,11 @@ AWS Budgets (Alertas)
 - Terraform instalado localmente (opcional, para testing)  
 - AWS CLI configurado (opcional)
 
+## 📘 Reproducción completa del workshop desde cero
+
+Para ver el procedimiento validado paso a paso, consulta [`steps.md`](./steps.md). Incluye desde la creación del backend remoto hasta la destrucción de la infraestructura con GitHub Actions.
+
+
 ## 🚀 Despliegue Manual con Terraform
 
 ```bash
@@ -141,6 +146,30 @@ terraform/
 └── providers.tf         # Configuración de providers
 ```
 
+## 🛠️  Estructura del REPO
+
+```
+aws-serverless-secure-website-workshop/
+├── src/                      # Código HTML del sitio
+│   └── index.html            # Página principal para S3
+├── terraform/                # Infraestructura como código
+│   ├── main.tf               # Recursos AWS y lógica principal
+│   ├── variables.tf          # Variables parametrizables
+│   ├── outputs.tf            # Resultados como URL de sitio
+│   └── README-GUIA.md        # Guía técnica detallada
+├── .github/workflows/        # Pipelines CI/CD
+│   ├── deploy.yml            # Workflow de despliegue automático
+│   └── destroy.yml           # Workflow de destrucción manual
+├── scripts/                  # Automatización del backend remoto
+│   ├── create-backend.sh     # Script para crear el bucket remoto con versionado
+│   └── delete-backend.sh     # Script para eliminar el bucket remoto con confirmación
+├── steps.md                  # Procedimiento completo validado desde cero
+├── LICENSE                   # Licencia MIT
+├── SECURITY.md               # Política de seguridad y cumplimiento
+├── README.md                 # Este archivo principal
+```
+
+
 ## 📦 Recursos Principales Creados
 
 - S3 Bucket: Almacenamiento estático del sitio web  
@@ -198,6 +227,117 @@ Incluye:
 
 Este archivo forma parte integral del aprendizaje del workshop y debe ser revisado antes de avanzar a nuevas fases.
 
+## ⚙️ Automatización del backend remoto de Terraform
+
+Este workshop utiliza un bucket S3 como backend remoto para almacenar el estado de Terraform (`terraform.tfstate`). Para facilitar su creación y eliminación controlada, se incluyen dos scripts Bash didácticos:
+
+---
+
+### 🛠️ `create-backend.sh` — Crear el bucket remoto
+
+Este script crea el bucket en la región `us-east-1` y habilita el versionado.
+
+```bash
+#!/bin/bash
+
+BUCKET_NAME="secure-static-site-central-seagull"
+REGION="us-east-1"
+
+echo "🚀 Iniciando creación del bucket remoto para Terraform backend..."
+echo "📦 Bucket: $BUCKET_NAME"
+echo "🌍 Región: $REGION"
+echo
+
+# Verificar si el bucket ya existe
+if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+  echo "⚠️ El bucket '$BUCKET_NAME' ya existe. No se realizará ninguna acción."
+  exit 0
+fi
+
+# Crear el bucket
+echo "⏳ Creando bucket..."
+aws s3api create-bucket \
+  --bucket "$BUCKET_NAME" \
+  --region "$REGION"
+
+# Habilitar versionado
+echo "⏳ Habilitando versionado..."
+aws s3api put-bucket-versioning \
+  --bucket "$BUCKET_NAME" \
+  --versioning-configuration Status=Enabled
+
+echo
+echo "✅ Bucket creado y versionado correctamente."
+echo "📍 Usa este bucket en tu backend de Terraform para almacenar terraform.tfstate"
+```
+
+---
+
+### 💣 `delete-backend.sh` — Eliminar el bucket remoto (con confirmación)
+
+Este script elimina todos los objetos del bucket y luego lo borra, **solo si el usuario confirma explícitamente**.
+
+```bash
+#!/bin/bash
+
+BUCKET_NAME="secure-static-site-central-seagull"
+
+echo "⚠️ Vas a eliminar el bucket remoto de Terraform backend:"
+echo "📦 Bucket: $BUCKET_NAME"
+echo
+read -p "¿Estás seguro de que deseas continuar? (escribe 'sí' para confirmar): " CONFIRM
+
+if [[ "$CONFIRM" != "sí" ]]; then
+  echo "❌ Operación cancelada por el usuario."
+  exit 1
+fi
+
+echo "⏳ Eliminando objetos del bucket..."
+aws s3 rm s3://"$BUCKET_NAME" --recursive
+
+echo "⏳ Eliminando bucket..."
+aws s3api delete-bucket \
+  --bucket "$BUCKET_NAME"
+
+echo
+echo "✅ Bucket eliminado completamente."
+```
+
+---
+
+### 🧠 Consideraciones didácticas
+
+- Estos scripts **no son gestionados por Terraform**, ya que el bucket del backend debe existir antes de ejecutar `terraform init`.
+- El script de eliminación requiere confirmación explícita (`sí`) para evitar errores accidentales.
+- Puedes incluir estos scripts en una carpeta `scripts/` y referenciarlos en tu guía como parte del flujo de preparación y limpieza del entorno.
+
+---
+
+### 📁 Ubicación sugerida
+
+```
+aws-serverless-secure-website-workshop/
+├── scripts/
+│   ├── create-backend.sh
+│   └── delete-backend.sh
+```
+
+---
+
+### 📚 Uso en el flujo del workshop
+
+- Ejecutar `create-backend.sh` antes de `terraform init`
+- Ejecutar `delete-backend.sh` solo si deseas limpiar completamente el entorno
+
+## ⚙️ Automatización del backend remoto
+
+Este workshop incluye dos scripts para facilitar la creación y eliminación del bucket remoto que almacena el estado de Terraform (`terraform.tfstate`):
+
+- [`create-backend.sh`](./scripts/create-backend.sh): crea el bucket con versionado habilitado
+- [`delete-backend.sh`](./scripts/delete-backend.sh): elimina el bucket con confirmación y soporte para versionado
+
+Consulta [`steps.md`](./steps.md) para ver el flujo completo validado desde cero.
+
 ---
 
 ## 📝 Conclusión
@@ -205,4 +345,5 @@ Este archivo forma parte integral del aprendizaje del workshop y debe ser revisa
 Este workshop demuestra un flujo completo de DevOps para infraestructura serverless en AWS, integrando mejores prácticas de seguridad, automatización y gestión de costos. El enfoque en la destrucción automática asegura control de costos y reproduceibilidad.
 
 ¿Listo para implementar? 🚀 Configura correctamente las credenciales AWS en GitHub Secrets y sigue los workflows automatizados para un despliegue sin problemas.
+
 
