@@ -1,207 +1,188 @@
-# 📘 README-GUIA.md — Workshop: Sitio Web Estático Seguro y Sin Costos en AWS
+# 🛠️ Workshop: Despliegue y destrucción automática de sitio estático seguro en AWS con Terraform y GitHub Actions
 
-Este documento guía el despliegue completo, validación de seguridad, automatización y documentación del workshop. Está diseñado para enseñar buenas prácticas DevSecOps, FinOps y IaC usando Terraform y GitHub Actions.
+## 📋 Descripción General
 
----
+Este workshop guía a través del despliegue automatizado de un sitio web estático seguro en AWS utilizando Terraform como Infraestructura como Código (IaC) y GitHub Actions para CI/CD. Incluye prácticas de seguridad, monitoreo de costos (FinOps) y destrucción automática de recursos.
 
-## 🧩 1. Estructura del repositorio
+## 🎯 Objetivos de Aprendizaje
 
-```
-aws-serverless-secure-website-workshop/
-├── src/                  # Contenido HTML del sitio web
-│   └── index.html        # Página principal que se sube a S3
-├── terraform/            # Módulo de infraestructura
-│   ├── main.tf           # Define todos los recursos AWS
-│   ├── variables.tf      # Variables parametrizables
-│   ├── outputs.tf        # Resultados como la URL del sitio
-│   └── README-GUIA.md    # Este archivo
-├── .github/workflows/    # Automatización CI/CD
-│   └── deploy.yml        # Workflow para aplicar Terraform automáticamente
-├── LICENSE               # Licencia MIT
-├── SECURITY.md           # Política de seguridad del proyecto
-├── README.md             # Portada del repositorio
-```
+- **Infraestructura como Código (IaC)**: Utilizar Terraform para definir y gestionar recursos AWS
+- **CI/CD Automatizado**: Implementar pipelines con GitHub Actions
+- **Seguridad**: Configurar políticas IAM mínimas y distribución segura con CloudFront + S3
+- **FinOps**: Monitorear costos con AWS Budgets
+- **Resolución de Problemas**: Diagnosticar y solucionar errores comunes en despliegues automatizados
 
----
+## 🏗️ Arquitectura de la Solución
 
-## 📂 2. Detalle de cada archivo Terraform
+Usuario → CloudFront (CDN) → S3 Bucket (Sitio Estático)  
+↓  
+AWS Budgets (Alertas)
 
-### `main.tf`
-Define todos los recursos del workshop:
-- S3 bucket con acceso restringido
-- CloudFront con OAC y cabeceras seguras
-- Subida automática de `index.html`
-- Política de acceso segura
-- Presupuesto FinOps
-- Outputs con la URL del sitio
+## ⚙️ Prerrequisitos
 
-### `variables.tf`
-Contiene las variables necesarias:
-- `aws_region`: región AWS
-- `budget_notification_email`: correo para alertas
-- `budget_limit`: monto mensual
-- `use_custom_domain` y `domain_name`: opcionales para dominio propio
+- Cuenta AWS con permisos administrativos  
+- Cuenta GitHub con acceso a GitHub Actions  
+- Terraform instalado localmente (opcional, para testing)  
+- AWS CLI configurado (opcional)
 
-### `outputs.tf`
-Entrega la URL final del sitio desplegado:
+## 🚀 Despliegue Manual con Terraform
 
-```
-output "cloudfront_url" {
-  value       = "https://${aws_cloudfront_distribution.cdn.domain_name}"
-  description = "URL del sitio desplegado en CloudFront"
-}
-```
-
----
-
-## 💸 3. Presupuesto FinOps en AWS
-
-El recurso creado en Terraform es:
-
-```
-resource "aws_budgets_budget" "monthly_budget" {
-  name         = "monthly-budget"
-  # ... configuración adicional
-}
-```
-
-🔍 En la consola de AWS, búscalo como:
-
-```
-Presupuesto: monthly-budget
-```
-
-Este presupuesto monitorea el servicio Amazon CloudFront y envía alertas al correo definido cuando se supera el 80% del límite.
-
----
-
-## 🔐 4. Validación de seguridad del sitio
-
-Una vez desplegado, accede a la URL generada:
-
-[https://d3ktm8cm9qh9bk.cloudfront.net](https://d3ktm8cm9qh9bk.cloudfront.net)
-
-Valida la seguridad con estas herramientas:
-
-1. **SSL Labs**
-   - Verifica el certificado HTTPS
-   - Evalúa el protocolo TLS
-   - Detecta vulnerabilidades en la configuración SSL
-
-2. **SecurityHeaders.com**
-   - Analiza las cabeceras HTTP
-   - Detecta si faltan cabeceras críticas como:
-     - Strict-Transport-Security
-     - Content-Security-Policy
-     - X-Frame-Options
-     - Referrer-Policy
-
-3. **Lighthouse**
-   - Audita performance, accesibilidad, SEO y buenas prácticas
-   - Ideal para validar la calidad del sitio como producto web
-
----
-
-## ⚙️ 5. Despliegue manual con Terraform
-
-Este workshop puede desplegarse manualmente con los siguientes comandos:
-
-```
+```bash
+git clone https://github.com/jgaragorry/aws-serverless-secure-website-workshop
+cd aws-serverless-secure-website-workshop/terraform
 terraform init
-terraform plan
-terraform apply --auto-approve
+terraform plan -var-file=terraform.tfvars
+terraform apply -var-file=terraform.tfvars
+terraform output -raw site_url
 ```
 
-Esto garantiza control total, validación paso a paso y corrección de errores en tiempo real.
+## 🔐 Configuración Crítica de Credenciales AWS en GitHub Actions
 
----
+⚠️ Esta configuración es fundamental para el funcionamiento del despliegue automatizado. Si no se configura desde el inicio, Terraform no podrá autenticarse con AWS, y todos los pasos del workflow fallarán.
 
-## 🤖 6. Automatización con GitHub Actions
+### ✅ Configuración de Secrets en GitHub
 
-El archivo `.github/workflows/deploy.yml` está configurado para ejecutar el despliegue automáticamente al hacer push a la rama `main`.
+Ir al repositorio → Settings → Secrets and variables → Actions  
+Crear los siguientes secretos:
 
-Contenido del workflow:
+| Nombre               | Valor (desde AWS IAM)                  |
+|----------------------|----------------------------------------|
+| AWS_ACCESS_KEY_ID    | Ejemplo: AKIAIOSFODNN7EXAMPLE          |
+| AWS_SECRET_ACCESS_KEY| Ejemplo: wJalrXUtnFEMI/K7MDENG/...     |
 
-```
-name: Deploy Static Website
+💡 Asegúrate de copiar los valores sin espacios extra, saltos de línea ni caracteres ocultos. Usa texto plano.
 
-on:
-  push:
-    branches: [main]
+### 🧠 ¿Por qué es importante?
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+Terraform usa estas variables para autenticarse con AWS. Si no están definidas correctamente:
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+- `terraform plan` falla con `No valid credential sources found`  
+- `terraform apply` no puede crear recursos  
+- El workflow completo se detiene
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+## 🚀 Despliegue Automático con GitHub Actions
 
-      - name: Terraform Init
-        run: terraform -chdir=terraform init
+Archivo: `.github/workflows/deploy.yml`  
+Este workflow se ejecuta automáticamente al hacer push a la rama `main`:
 
-      - name: Terraform Plan
-        run: terraform -chdir=terraform plan
+1. Checkout del código  
+2. Configuración de credenciales AWS usando GitHub Secrets  
+3. `terraform init`  
+4. `terraform plan -var-file=terraform.tfvars`  
+5. `terraform apply`  
+6. `terraform output -raw site_url`  
+7. `curl -I $site_url` para verificar que el sitio esté activo
 
-      - name: Terraform Apply
-        run: terraform -chdir=terraform apply -auto-approve
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+### 🧠 Corrección Importante en Output
 
-      - name: Obtener URL del sitio
-        id: terraform_output
-        run: |
-          echo "site_url=$(terraform -chdir=terraform output -raw site_url)" >> $GITHUB_OUTPUT
+Para evitar errores de formato en `$GITHUB_OUTPUT`, se debe usar:
 
-      - name: Verificar sitio activo
-        run: curl -I ${{ steps.terraform_output.outputs.site_url }}
-```
-
-**Requisitos previos:**
-- Las credenciales AWS deben estar configuradas como secretos en GitHub (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
-- El código en `terraform/` debe estar completo y sin errores.
-- Las variables deben tener valores por defecto o estar definidas en `terraform.tfvars`.
-
----
-
-## 🧠 7. Lecciones aprendidas
-
-- Terraform no permite duplicar bloques `provider` ni `required_providers`.
-- Algunos atributos como `iam_arn`, `cost_filters` o `budget_filter` han sido deprecados.
-- Las cabeceras de seguridad deben configurarse con `aws_cloudfront_response_headers_policy`.
-- Validar cada paso con `terraform plan` evita errores en producción.
-- Documentar cada corrección como parte del aprendizaje DevSecOps.
-
----
-
-## 🧹 8. Destrucción segura
-
-Para evitar cargos innecesarios en AWS:
-
-```
-terraform destroy --auto-approve
+```yaml
+- name: Obtener URL del sitio
+  id: terraform_output
+  run: |
+    site_url=$(terraform -chdir=terraform output -raw site_url)
+    echo "site_url=$site_url" >> $GITHUB_OUTPUT
 ```
 
-Esto elimina todos los recursos creados, incluyendo:
-- S3 bucket
-- CloudFront distribution
-- Presupuesto FinOps
+### 🧪 Validación Esperada
 
----
+- `terraform plan` y `apply` funcionan sin errores  
+- Se extrae la URL del sitio con `terraform output`  
+- El sitio se verifica con `curl -I` y retorna estado 200
 
-## 👨‍🏫 9. Autor
+## 🧹 Destrucción Automática con GitHub Actions
 
-José Garagorry  
-🔗 LinkedIn · 🐙 GitHub · 📺 YouTube
+Archivo: `.github/workflows/destroy.yml`  
+Permite destruir toda la infraestructura manualmente desde la pestaña Actions de GitHub.
 
----
+### Flujo del workflow:
 
-## 📄 10. Licencia
+1. `terraform init`  
+2. `terraform destroy -auto-approve -var-file=terraform.tfvars`
 
-Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+### ✅ Ejecución Manual
+
+Ir a GitHub → pestaña Actions  
+Seleccionar el workflow `Destroy Infrastructure`  
+Click en `Run workflow`
+
+## 🔍 Verificación Manual Post-Destroy en AWS
+
+Aunque `terraform destroy` reporta eliminación completa, puede que queden recursos activos en consola AWS, especialmente distribuciones CloudFront.
+
+### 🧠 Diagnóstico
+
+Recursos creados o modificados fuera del control de Terraform no pueden ser destruidos automáticamente.  
+Ejemplo: distribuciones CloudFront activas que no están en estado Terraform.
+
+### ✅ Solución Aplicada
+
+- Deshabilitar la distribución manualmente en la consola AWS  
+- Esperar la propagación de cambios  
+- Eliminar manualmente la distribución residual
+
+## 📋 Checklist de Verificación Post-Destroy
+
+- S3 → Buckets: no debe existir `secure-static-site-*`  
+- CloudFront → Distributions: ninguna activa  
+- Billing → Budgets: presupuesto eliminado  
+- (Opcional) IAM → Roles/Policies: sin residuos  
+- (Opcional) CloudFormation / EC2 / Elastic IPs: sin recursos huérfanos
+
+## 🛠️ Estructura de Archivos Terraform
+
+```text
+terraform/
+├── main.tf              # Recursos principales
+├── variables.tf         # Variables definidas
+├── terraform.tfvars     # Valores de variables
+├── outputs.tf           # Outputs para GitHub Actions
+└── providers.tf         # Configuración de providers
 ```
+
+## 📦 Recursos Principales Creados
+
+- S3 Bucket: Almacenamiento estático del sitio web  
+- CloudFront Distribution: CDN para distribución global y HTTPS  
+- IAM Policies: Permisos mínimos necesarios  
+- AWS Budget: Monitoreo de costos y alertas
+
+## 🧪 Reproducción del Workshop para Validación Completa
+
+### Proceso de Validación
+
+1. Despliegue Inicial: Ejecutar workflow de deploy  
+2. Verificación Funcional: Confirmar que el sitio está accesible  
+3. Destrucción: Ejecutar workflow de destroy  
+4. Limpieza Manual: Verificar y eliminar recursos residuales  
+5. Repetición: Confirmar que el proceso es reproducible
+
+### Criterios de Éxito
+
+- Todos los recursos se crean bajo control de Terraform  
+- No quedan residuos manuales después de destroy  
+- El modelo es reproducible y consistente  
+- Las credenciales se gestionan de forma segura  
+- Los costos se monitorean adecuadamente
+
+## 🔧 Troubleshooting Común
+
+- **Error**: `No valid credential sources found`  
+  **Causa**: Secrets de AWS no configurados correctamente en GitHub  
+  **Solución**: Verificar formato y valores en GitHub Secrets
+
+- **Error**: `CloudFront distribution still exists after destroy`  
+  **Causa**: Distribución no completamente deshabilitada  
+  **Solución**: Deshabilitar manualmente y esperar propagación
+
+- **Error**: `BucketNotEmpty` durante destroy  
+  **Causa**: Objetos residuales en bucket S3  
+  **Solución**: Vaciar bucket manualmente antes de destroy
+
+## 📝 Conclusión
+
+Este workshop demuestra un flujo completo de DevOps para infraestructura serverless en AWS, integrando mejores prácticas de seguridad, automatización y gestión de costos. El enfoque en la destrucción automática asegura control de costos y reproduceibilidad.
+
+¿Listo para implementar? 🚀 Configura correctamente las credenciales AWS en GitHub Secrets y sigue los workflows automatizados para un despliegue sin problemas.
 

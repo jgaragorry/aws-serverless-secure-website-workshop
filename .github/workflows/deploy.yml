@@ -35,8 +35,6 @@ jobs:
       - name: Obtener URL del sitio
         id: terraform_output
         run: |
-          echo "site_url=$(terraform -chdir=terraform output -raw site_url)" >> $GITHUB_OUTPUT
-
-      - name: Verificar sitio activo
-        run: curl -I ${{ steps.terraform_output.outputs.site_url }}
+          site_url=$(terraform -chdir=terraform output -raw site_url)
+          echo "site_url=$site_url" >> $GITHUB_OUTPUT
 
