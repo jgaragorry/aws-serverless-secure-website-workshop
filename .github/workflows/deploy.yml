@@ -38,10 +38,11 @@ jobs:
         run: terraform -chdir=terraform apply -auto-approve tfplan
 
       - name: Export site_url to file
-        run: terraform -chdir=terraform output -raw site_url >> site_url.txt
+        run: terraform -chdir=terraform output -raw site_url > site_url.txt
 
       - name: Load site_url into environment
-        run: echo "SITE_URL=$(cat site_url.txt)" >> $GITHUB_ENV
+        run: |
+          echo "SITE_URL=$(cat site_url.txt)" | tee -a $GITHUB_ENV
 
       - name: Print CloudFront URL
         run: echo "✅ Sitio desplegado en: $SITE_URL"
