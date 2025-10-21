@@ -5,7 +5,7 @@ variable "use_custom_domain" {
 }
 
 variable "domain_name" {
-  description = "Dominio raíz del sitio (solo si use_custom_domain = true)"
+  description = "Nombre de dominio personalizado (si aplica)"
   type        = string
   default     = ""
 }

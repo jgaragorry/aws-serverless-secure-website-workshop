@@ -1,173 +1,155 @@
-# 🧭 Guía Paso a Paso para el Workshop: Zero-Cost Secure Static Website on AWS
+# 🛠️ Workshop: AWS Serverless Secure Website con Terraform
 
-Esta guía te acompaña fase por fase para ejecutar el workshop desde tu entorno local (WSL) hasta la nube, aplicando prácticas reales de DevOps, DevSecOps, IaC y FinOps. Está diseñada para que puedas reproducir el despliegue sin errores, sin costos innecesarios y con validación completa.
-
----
-
-## 🧩 Fase 0: Preparación del Entorno
-
-### 🎯 Objetivo
-Configurar todo lo necesario para ejecutar el workshop desde WSL de forma segura y reproducible.
-
-### 🛠️ Acciones
-
-1. Forkea el repositorio en tu cuenta de GitHub
-2. Clónalo localmente en WSL:
-   ```bash
-   git clone https://github.com/TU_USUARIO/aws-serverless-secure-website-workshop.git
-   cd aws-serverless-secure-website-workshop
-   ```
-3. Instala Terraform CLI en WSL
-4. Configura tus credenciales AWS en WSL:
-   ```bash
-   export AWS_ACCESS_KEY_ID="TU_ACCESS_KEY"
-   export AWS_SECRET_ACCESS_KEY="TU_SECRET_KEY"
-   ```
-5. Configura los mismos secretos en GitHub:
-   - Ve a Settings > Secrets > Actions
-   - Añade:
-     - `AWS_ACCESS_KEY_ID`
-     - `AWS_SECRET_ACCESS_KEY`
-
-### ✅ Buenas prácticas aplicadas
-- Separación de infraestructura y código fuente
-- Uso de secretos encriptados (DevSecOps)
-- Repositorio modular y didáctico
+Este workshop enseña cómo desplegar un sitio web estático en AWS usando Terraform, aplicando buenas prácticas de seguridad, automatización, reproducibilidad y FinOps.
 
 ---
 
-## 🧩 Fase 1: Validación Local con Terraform
+## 📁 Estructura del repositorio
 
-### 🎯 Objetivo
-Verificar que la infraestructura se puede desplegar correctamente antes de usar CI/CD.
-
-### 🛠️ Acciones
-
-1. Desde WSL, entra a la carpeta Terraform:
-   ```bash
-   cd terraform
-   terraform init
-   terraform plan
-   ```
-2. Si el plan es correcto, puedes aplicar manualmente:
-   ```bash
-   terraform apply -auto-approve
-   ```
-3. Verifica que se haya creado el bucket y la distribución de CloudFront
-
-4. Si estás en modo CI/CD, omite el `apply` local y continúa con la Fase 2
-
-### ✅ Buenas prácticas aplicadas
-- Validación previa al despliegue
-- Infraestructura como código (IaC)
-- Control de errores antes de automatizar
+```
+aws-serverless-secure-website-workshop/
+├── terraform/
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── providers.tf
+├── src/
+│   └── index.html
+```
 
 ---
 
-## 🧩 Fase 2: Despliegue Automatizado con GitHub Actions
+## 📦 ¿Qué hace cada archivo Terraform?
 
-### 🎯 Objetivo
-Ejecutar el pipeline CI/CD para desplegar la infraestructura y el sitio web automáticamente.
+Todos los archivos `.tf` están dentro de la carpeta `terraform/` para mantener la infraestructura separada del contenido del sitio (`src/`). Terraform carga automáticamente todos los `.tf` del directorio activo, sin importar el orden alfabético. Sin embargo, el orden lógico de lectura y ejecución es el siguiente:
 
-### 🛠️ Acciones
+### `providers.tf`
 
-1. Haz push a la rama `main`:
-   ```bash
-   git add .
-   git commit -m "Inicio del workshop"
-   git push origin main
-   ```
-2. Ve a la pestaña **Actions** en GitHub
-3. Aprueba el workflow `Deploy Static Website`
-4. Espera a que se complete el despliegue
+- 📌 **Propósito**: Define los proveedores que usaremos (`aws`, `random`) y la región.
+- 🧠 **Por qué es importante**: Sin esto, Terraform no sabe qué servicios usar ni dónde desplegar.
+- 🧪 **Cuándo se usa**: En `terraform init`, para instalar los plugins necesarios.
 
-### 🔍 ¿Qué se despliega?
+### `variables.tf`
 
-- 🪣 S3 Bucket con el sitio estático
-- 📦 CloudFront Distribution con HTTPS
-- 🛡️ WAF y cabeceras de seguridad
-- ⚙️ CloudFront Function
-- 💸 AWS Budgets para control de costos
+- 📌 **Propósito**: Declara las variables que podemos personalizar (`use_custom_domain`, `domain_name`, `budget_notification_email`).
+- 🧠 **Por qué es importante**: Permite parametrizar el despliegue y hacerlo reutilizable.
+- 🧪 **Cuándo se usa**: En `terraform plan` y `terraform apply`, cuando se solicitan valores o se usan condicionales.
 
-### ✅ Buenas prácticas aplicadas
-- CI/CD con aprobación manual
-- Seguridad desde el diseño (DevSecOps)
-- FinOps: presupuesto con alertas
-- Despliegue reproducible y automatizado
+### `main.tf`
+
+- 📌 **Propósito**: Define todos los recursos de AWS que se van a crear.
+- 🧠 **Por qué es importante**: Es el núcleo del despliegue: bucket, CloudFront, OAI, política, presupuesto, y subida automática del sitio.
+- 🧪 **Cuándo se usa**: En `terraform plan`, `apply` y `destroy`.
+
+### `outputs.tf`
+
+- 📌 **Propósito**: Expone valores útiles después del despliegue, como la URL del sitio.
+- 🧠 **Por qué es importante**: Permite mostrar resultados al usuario sin buscar en la consola.
+- 🧪 **Cuándo se usa**: En `terraform apply` y `terraform output`.
 
 ---
 
-## 🧩 Fase 3: Análisis y Validación Post-Despliegue
+## 🚀 Fase 1 – Validación local
 
-### 🎯 Objetivo
-Verificar que el sitio esté activo, seguro y optimizado.
+Antes de desplegar, valida y formatea tu configuración:
 
-### 🛠️ Acciones
+```bash
+terraform fmt
+terraform validate
+```
 
-1. Copia el endpoint de CloudFront desde la salida del workflow o desde WSL:
-   ```bash
-   terraform output site_url
-   ```
-2. Accede al sitio en tu navegador
-3. Valida con herramientas externas:
-   - [SSL Labs](https://www.ssllabs.com/ssltest/)
-   - [SecurityHeaders.com](https://securityheaders.com/)
-   - Lighthouse (desde Chrome DevTools)
-
-### ✅ Buenas prácticas aplicadas
-- Validación externa de seguridad y performance
-- Uso de HTTPS sin dominio personalizado
-- Cabeceras seguras con CloudFront Function
+Esto asegura que la sintaxis esté correcta y el estilo sea consistente.
 
 ---
 
-## 🧩 Fase 4: Destrucción Segura (FinOps)
+## ⚙️ Fase 2 – Inicialización y plan
 
-### 🎯 Objetivo
-Eliminar todos los recursos para evitar costos residuales.
+Inicializa el entorno Terraform y genera el plan de ejecución:
 
-### 🛠️ Acciones
+```bash
+terraform init
+terraform plan
+```
 
-1. Desde WSL:
-   ```bash
-   terraform destroy -auto-approve
-   ```
-2. O desde GitHub:
-   - Ve a la pestaña **Actions**
-   - Ejecuta el workflow `Destroy Infrastructure`
-3. Confirma que el mensaje final indique éxito
-
-### 🔥 ¿Qué se destruye?
-
-- 🪣 S3 Bucket
-- 📦 CloudFront Distribution
-- 🛡️ WAF
-- ⚙️ CloudFront Function
-- 💸 AWS Budgets
-
-### ✅ Buenas prácticas aplicadas
-- FinOps: destrucción total automatizada
-- Terraform `force_destroy` en S3
-- Eliminación de presupuestos y configuraciones
+Verifica que el plan indique `add` y no haya errores. Si usas variables como `budget_notification_email`, se te pedirá ingresarlas.
 
 ---
 
-## 🧠 Extras y Extensiones
+## 🧩 Fase 3 – Despliegue automatizado y validación del sitio
 
-- Puedes crear la carpeta `/docs/` con explicaciones para principiantes
-- Puedes exportar los diagramas como PNG para tus redes
-- Puedes crear un release `v1.0.0` para compartir una versión estable
+Ejecuta el despliegue completo:
+
+```bash
+terraform apply -auto-approve
+```
+
+Esto crea automáticamente:
+
+- 🪣 Un bucket S3 con nombre aleatorio (`random_pet`)
+- 📦 Una distribución CloudFront con HTTPS y OAI
+- 🛡️ Una política de acceso segura que permite solo a CloudFront leer el contenido
+- 📤 Subida automática del archivo `src/index.html` al bucket mediante `aws_s3_object`
+- 💸 Un presupuesto FinOps con alertas al correo definido
 
 ---
 
-## 🧑‍🏫 Autor
+### ✅ Validación post-deploy
 
-**Jesús Garagorry**  
-[🔗 LinkedIn](https://www.linkedin.com/in/jgaragorry/) · [🐙 GitHub](https://github.com/jgaragorry) · [📺 YouTube](https://www.youtube.com/@Softraincorp)
+1. **Obtén la URL del sitio:**
+
+```bash
+terraform output site_url
+```
+
+Ejemplo:
+
+```
+site_url = "https://d9g53hw2erdpd.cloudfront.net"
+```
+
+2. **Accede al sitio en tu navegador** y verifica que se muestra el contenido de `index.html`.
+
+3. **Valida seguridad y performance** con herramientas externas:
+
+| Herramienta        | ¿Qué valida?             | Enlace                                      |
+|--------------------|--------------------------|---------------------------------------------|
+| SSL Labs           | HTTPS y cifrado          | https://www.ssllabs.com/ssltest/            |
+| SecurityHeaders    | Cabeceras HTTP seguras   | https://securityheaders.com/                |
+| Lighthouse         | Performance y accesibilidad | Chrome DevTools > Audits                |
 
 ---
 
-## 📄 Licencia
+## 🔥 Fase 4 – Destrucción segura (FinOps)
 
-Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+Una vez validado el despliegue, elimina todos los recursos para evitar costos:
+
+```bash
+terraform destroy -auto-approve
+```
+
+Esto elimina:
+
+- El bucket S3
+- La distribución CloudFront
+- La política de acceso
+- El presupuesto FinOps
+
+---
+
+## 📌 Notas didácticas
+
+- El archivo `index.html` se sube automáticamente gracias al recurso `aws_s3_object`, eliminando el paso manual `aws s3 cp`.
+- El nombre del bucket se genera dinámicamente con `random_pet` para evitar colisiones.
+- La política de acceso restringe el contenido a CloudFront, siguiendo buenas prácticas de seguridad.
+- El presupuesto FinOps permite enseñar control de costos desde el primer despliegue.
+- El flujo completo es reproducible, validado y listo para ser integrado en GitHub Actions.
+
+---
+
+## 🎓 Recomendaciones para estudiantes
+
+- Clona el repositorio y sigue las fases paso a paso.
+- Modifica el archivo `src/index.html` para personalizar tu sitio.
+- Usa `terraform destroy` al finalizar para evitar cargos.
+- Comparte tu sitio y validación en redes como parte de tu portafolio DevOps.
 
